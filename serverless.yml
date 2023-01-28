@@ -16,20 +16,8 @@ package:
     - ./bin/**
 
 functions:
-  hello:
-    handler: bin/hello
-    events:
-      - httpApi:
-          path: /hello
-          method: get
-  world:
-    handler: bin/world
-    events:
-      - httpApi:
-          path: /world
-          method: get
   listClients:
-    handler: bin/listClients
+    handler: bin/internal/listClients
     events:
       - httpApi:
           path: /listClients
