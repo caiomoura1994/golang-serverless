@@ -28,4 +28,9 @@ functions:
       - httpApi:
           path: /world
           method: get
-  
+  listClients:
+    handler: bin/listClients
+    events:
+      - httpApi:
+          path: /listClients
+          method: post
