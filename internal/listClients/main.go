@@ -135,7 +135,7 @@ func FindUserByCpf(requestBodyMessage RequestsBodyData) *http.Response {
 
 func ParseListClientResponse(r *http.Response) []byte {
 	readedBody, _ := io.ReadAll(r.Body)
-	var res map[string]interface{}
+	var res ListClientsResponse
 	json.Unmarshal(readedBody, &res)
 	body, _ := json.Marshal(&res)
 	return body
