@@ -1,0 +1,31 @@
+
+service: golang-omie-serverless
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: stage, 'dev'
+
+plugins:
+  - serverless-offline
+
+package:
+  patterns:
+    - '!./**'
+    - ./bin/**
+
+functions:
+  hello:
+    handler: bin/hello
+    events:
+      - httpApi:
+          path: /hello
+          method: get
+  world:
+    handler: bin/world
+    events:
+      - httpApi:
+          path: /world
+          method: get
+  
