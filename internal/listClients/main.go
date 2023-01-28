@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -105,7 +106,7 @@ type ListClientsResponse struct {
 	TotalDeRegistros int `json:"total_de_registros"`
 }
 
-func FindUserByCpf(requestBodyMessage RequestsBodyData) (int, error, *http.Response) {
+func FindUserByCpf(requestBodyMessage RequestsBodyData) *http.Response {
 	omieRequestUrl := "https://app.omie.com.br/api/v1/geral/clientes/"
 	json_request_list_client := &OmieRequests[OmieRequestListClient]{
 		Call:       requestBodyMessage.Call,
@@ -124,23 +125,19 @@ func FindUserByCpf(requestBodyMessage RequestsBodyData) (int, error, *http.Respo
 		},
 	}
 	json_data, _ := json.Marshal(json_request_list_client)
-	r, requestError := http.Post(
+	r, _ := http.Post(
 		omieRequestUrl,
 		"application/json",
 		bytes.NewBuffer(json_data),
 	)
-	if requestError != nil {
-		return 404, requestError, nil
-	}
-	defer r.Body.Close()
-	return 200, nil, r
+	return r
 }
 
 func ParseListClientResponse(r *http.Response) []byte {
 	readedBody, _ := io.ReadAll(r.Body)
-	var listClientResponse map[string]ListClientsResponse
-	json.Unmarshal(readedBody, &listClientResponse)
-	body, _ := json.Marshal(&listClientResponse)
+	var res map[string]interface{}
+	json.Unmarshal(readedBody, &res)
+	body, _ := json.Marshal(&res)
 	return body
 }
 
@@ -148,17 +145,22 @@ func ParseListClientResponse(r *http.Response) []byte {
 func Handler(ctx context.Context, request events.APIGatewayProxyRequest) (LambdaResponse, error) {
 	paramsBody := request.Body
 	var requestBodyMessage RequestsBodyData
-	json.Unmarshal([]byte(paramsBody), &requestBodyMessage)
-	var buf bytes.Buffer
 
-	statusCode, errorResp, r := FindUserByCpf(requestBodyMessage)
-	if statusCode == 404 {
-		return LambdaResponse{StatusCode: 404}, errorResp
+	err := json.Unmarshal([]byte(paramsBody), &requestBodyMessage)
+	if err != nil {
+		panic("Campos inválidos")
 	}
-
+	fmt.Println("requestBodyMessage", requestBodyMessage)
+	var buf bytes.Buffer
+	r := FindUserByCpf(requestBodyMessage)
+	defer r.Body.Close()
 	body := ParseListClientResponse(r)
 	json.HTMLEscape(&buf, body)
-	resp := LambdaResponse{StatusCode: 200, Body: buf.String()}
+	resp := LambdaResponse{
+		StatusCode: 200,
+		Body:       buf.String(),
+	}
+
 	return resp, nil
 }
 
