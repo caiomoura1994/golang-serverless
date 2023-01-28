@@ -8,8 +8,10 @@ build:
 clean:
 	rm -rf ./bin
 
-deploy: clean build
-	sls deploy --verbose
+deploy:
+	clean 
+	build
+	sls deploy --verbose --stage $(stage)
 
 start: build
 	sls offline --useDocker start --host 0.0.0.0  --verbose
