@@ -22,3 +22,9 @@ functions:
       - httpApi:
           path: /listClients
           method: post
+  upSertClient:
+    handler: bin/internal/upSertClient
+    events:
+      - httpApi:
+          path: /upSertClient
+          method: post
